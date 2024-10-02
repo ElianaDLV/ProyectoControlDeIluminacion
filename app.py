@@ -1,16 +1,16 @@
-import os
 from flask import Flask, request, jsonify
 import mysql.connector
 from mysql.connector import Error
+import os
 
-app = Flask(__name__)  # Corregido _name_ a __name__
+app = Flask(__name__)
 
 # Configura tu conexión a la base de datos usando variables de entorno
 db_config = {
-    "host": "localhost",  # Asegúrate de que es correcto si MySQL está corriendo localmente.
-    "user": "root",  # El usuario de MySQL que creaste.
-    "password": "4413",  # La contraseña correcta para ese usuario.
-    "database": "mi_base_de_datos"  # El nombre de la base de datos a la que quieres conectarte.
+    "host": os.getenv("DB_HOST", "localhost"),
+    "user": os.getenv("DB_USER", "root"),
+    "password": os.getenv("DB_PASSWORD", "4413"),
+    "database": os.getenv("DB_NAME", "mi_base_de_datos"),
 }
 
 @app.route("/data", methods=["POST"])
