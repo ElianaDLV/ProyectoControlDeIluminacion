@@ -1,3 +1,3 @@
-﻿## Proyecto Control De Iluminación Automático 
+﻿# Proyecto Control De Iluminación Automático 
 
-# Descripción
+## Descripción
