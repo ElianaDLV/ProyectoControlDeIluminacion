@@ -21,13 +21,13 @@ def insert_data():
         data = request.get_json()
 
         # Extraer los campos necesarios
-        capacidad = data.get("light_level")  # Cambia esto por el valor que desees enviar como capacidad
-        sensor_id = data.get("sensor_id")  # Este campo puede ser opcional o puedes definirlo en el ESP32
-        timestamp = data.get("timestamp")  # También puedes usar el timestamp actual si no se envía
+        light_level = data.get("light_level")  # Este será el campo 'capacidad' en la base de datos
+        sensor_id = data.get("sensor_id", "ESP32_Sensor")  # Puedes ajustar esto según tus necesidades
+        timestamp = data.get("timestamp")  # Puedes usar el timestamp enviado o dejar que la base de datos lo genere
 
-        # Comprobar que el campo 'capacidad' no sea None
-        if capacidad is None:
-            return jsonify({"status": "error", "message": "capacidad es requerido"}), 400
+        # Comprobar que el campo 'light_level' no sea None
+        if light_level is None:
+            return jsonify({"status": "error", "message": "light_level es requerido"}), 400
 
         # Conectar a la base de datos e insertar los datos
         try:
@@ -35,7 +35,7 @@ def insert_data():
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO capacidad_esp32 (capacidad, timestamp, sensor_id) VALUES (%s, %s, %s)",
-                (capacidad, timestamp, sensor_id)  # Ajusta según tu estructura de tabla
+                (light_level, timestamp, sensor_id)
             )
             conn.commit()
             cursor.close()
