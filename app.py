@@ -7,10 +7,10 @@ app = Flask(__name__)
 
 # Configura tu conexión a la base de datos usando variables de entorno
 db_config = {
-    "host": os.getenv("DB_HOST", "localhost"),
-    "user": os.getenv("DB_USER", "root"),
-    "password": os.getenv("DB_PASSWORD", "4413"),
-    "database": os.getenv("DB_NAME", "mi_base_de_datos"),
+    "host": os.getenv("MYSQL_HOST"),  # Asegúrate de que esta variable esté configurada
+    "user": os.getenv("root"),  # Usuario de tu base de datos
+    "password": os.getenv("4413"),  # Contraseña de tu base de datos
+    "database": os.getenv("mi_base_de_datos"),  # Nombre de la base de datos
 }
 
 @app.route("/data", methods=["POST"])
@@ -46,6 +46,22 @@ def insert_data():
             return jsonify({"status": "error", "message": str(err)}), 500
     else:
         return jsonify({"status": "error", "message": "La solicitud debe ser JSON"}), 400
+
+@app.route("/data", methods=["GET"])
+def get_data():
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("SELECT * FROM capacidad_esp32")
+        results = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(results), 200
+    except Error as err:
+        return jsonify({"status": "error", "message": str(err)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
