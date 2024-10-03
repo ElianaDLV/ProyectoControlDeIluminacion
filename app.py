@@ -23,19 +23,21 @@ def insert_data():
         # Extraer los campos necesarios
         light_level = data.get("light_level")  # Este será el campo 'capacidad' en la base de datos
         sensor_id = data.get("sensor_id", "ESP32_Sensor")  # Puedes ajustar esto según tus necesidades
-        timestamp = data.get("timestamp")  # Puedes usar el timestamp enviado o dejar que la base de datos lo genere
 
-        # Comprobar que el campo 'light_level' no sea None
-        if light_level is None:
-            return jsonify({"status": "error", "message": "light_level es requerido"}), 400
+        # Comprobar que el campo 'light_level' no sea None y sea un número
+        if light_level is None or not isinstance(light_level, (int, float)):
+            return jsonify({"status": "error", "message": "light_level es requerido y debe ser un número"}), 400
+
 
         # Conectar a la base de datos e insertar los datos
         try:
             conn = mysql.connector.connect(**db_config)
             cursor = conn.cursor()
+            
+            # Omitimos el campo 'timestamp' en la consulta para que MySQL lo genere automáticamente
             cursor.execute(
-                "INSERT INTO capacidad_esp32 (capacidad, timestamp, sensor_id) VALUES (%s, %s, %s)",
-                (light_level, timestamp, sensor_id)
+                "INSERT INTO capacidad_esp32 (capacidad, sensor_id) VALUES (%s, %s)",
+                (light_level, sensor_id)
             )
             conn.commit()
             cursor.close()
