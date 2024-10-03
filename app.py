@@ -1,13 +1,13 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Corrige el nombre del módulo
+from flask_cors import CORS
 import mysql.connector
 import os
 
 app = Flask(__name__)
-CORS(app)  # Habilita CORS para toda la aplicación
+CORS(app)  # Habilitar CORS para permitir solicitudes de diferentes orígenes
 
 # Configura tu conexión a la base de datos usando variables de entorno
-dbconfig = {
+db_config = {
     "host": "bzblpg99biozcrivgozu-mysql.services.clever-cloud.com",
     "user": "uggqczjfkgrrerdg",
     "password": "10SR42jjPz8tnaFfyk6l",
@@ -16,20 +16,28 @@ dbconfig = {
 }
 
 @app.route("/data", methods=["POST"])
-def insertdata():
+def insert_data():
     if request.is_json:
         data = request.get_json()
-        data_to_send = data.get("value")
 
-        if data_to_send is None:
-            return jsonify({"status": "error", "message": "data is required"}), 400
+        # Extraer los campos necesarios
+        campo1 = data.get("campo1")
+        humidity = data.get("humidity")
+        light_level = data.get("light_level")
+        led_state = data.get("led_state")
+        timestamp = data.get("timestamp")
 
-        # Aquí va tu lógica para insertar en la base de datos
+        # Comprobar que el campo 'campo1' no sea None
+        if campo1 is None:
+            return jsonify({"status": "error", "message": "campo1 es requerido"}), 400
+
+        # Conectar a la base de datos e insertar los datos
         try:
-            conn = mysql.connector.connect(**dbconfig)  # Corrige el nombre de la variable
+            conn = mysql.connector.connect(**db_config)
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO sensor_data (value) VALUES (%s)", (data_to_send,)
+                "INSERT INTO sensor_data (temperature, humidity, light_level, led_state, timestamp) VALUES (%s, %s, %s, %s, %s)",
+                (campo1, humidity, light_level, led_state, timestamp)
             )
             conn.commit()
             cursor.close()
