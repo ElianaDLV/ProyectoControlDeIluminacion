@@ -7,10 +7,10 @@ app = Flask(__name__)
 
 # Configura tu conexión a la base de datos usando variables de entorno
 db_config = {
-    "host": os.getenv("MYSQL_HOST"),  # Asegúrate de que esta variable esté configurada
-    "user": os.getenv("root"),  # Usuario de tu base de datos
-    "password": os.getenv("4413"),  # Contraseña de tu base de datos
-    "database": os.getenv("mi_base_de_datos"),  # Nombre de la base de datos
+    "host": os.getenv("bzblpg99biozcrivgozu-mysql.services.clever-cloud.com"),  # Asegúrate de que esta variable esté configurada
+    "user": os.getenv("uggqczjfkgrrerdg"),  # Usuario de tu base de datos
+    "password": os.getenv("10SR42jjPz8tnaFfyk6l"),  # Contraseña de tu base de datos
+    "database": os.getenv("bzblpg99biozcrivgozu"),  # Nombre de la base de datos
 }
 
 @app.route("/data", methods=["POST"])
