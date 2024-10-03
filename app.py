@@ -21,23 +21,21 @@ def insert_data():
         data = request.get_json()
 
         # Extraer los campos necesarios
-        campo1 = data.get("campo1")
-        humidity = data.get("humidity")
-        light_level = data.get("light_level")
-        led_state = data.get("led_state")
-        timestamp = data.get("timestamp")
+        capacidad = data.get("light_level")  # Cambia esto por el valor que desees enviar como capacidad
+        sensor_id = data.get("sensor_id")  # Este campo puede ser opcional o puedes definirlo en el ESP32
+        timestamp = data.get("timestamp")  # También puedes usar el timestamp actual si no se envía
 
-        # Comprobar que el campo 'campo1' no sea None
-        if campo1 is None:
-            return jsonify({"status": "error", "message": "campo1 es requerido"}), 400
+        # Comprobar que el campo 'capacidad' no sea None
+        if capacidad is None:
+            return jsonify({"status": "error", "message": "capacidad es requerido"}), 400
 
         # Conectar a la base de datos e insertar los datos
         try:
             conn = mysql.connector.connect(**db_config)
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO sensor_data (temperature, humidity, light_level, led_state, timestamp) VALUES (%s, %s, %s, %s, %s)",
-                (campo1, humidity, light_level, led_state, timestamp)
+                "INSERT INTO capacidad_esp32 (capacidad, timestamp, sensor_id) VALUES (%s, %s, %s)",
+                (capacidad, timestamp, sensor_id)  # Ajusta según tu estructura de tabla
             )
             conn.commit()
             cursor.close()
