@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
-from flaskcors import CORS
+from flask_cors import CORS  # Corrige el nombre del módulo
 import mysql.connector
 import os
 
 app = Flask(__name__)
+CORS(app)  # Habilita CORS para toda la aplicación
 
 # Configura tu conexión a la base de datos usando variables de entorno
 dbconfig = {
@@ -16,7 +17,7 @@ dbconfig = {
 
 @app.route("/data", methods=["POST"])
 def insertdata():
-    if request.isjson:
+    if request.is_json:
         data = request.get_json()
         data_to_send = data.get("value")
 
@@ -25,7 +26,7 @@ def insertdata():
 
         # Aquí va tu lógica para insertar en la base de datos
         try:
-            conn = mysql.connector.connect(**db_config)
+            conn = mysql.connector.connect(**dbconfig)  # Corrige el nombre de la variable
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO sensor_data (value) VALUES (%s)", (data_to_send,)
