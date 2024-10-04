@@ -6,13 +6,13 @@ Este proyecto tiene como objetivo escalar una plataforma IoT basada en microcont
 ## Tecnologías utilizadas
 
 ### Hardware:
-ESP32: Microcontrolador.
-Sensor de Luz LDR: Sensor de luz.
-LED: Actuador.
-Pantalla OLED SSD1306: Display para visualización.
+ESP32: Microcontrolador.<br />
+Sensor de Luz LDR: Sensor de luz.<br />
+LED: Actuador.<br />
+Pantalla OLED SSD1306: Display para visualización.<br />
 
 ### Software:
-MicroPython: Lenguaje de programación para ESP32.
-Flask: Framework de Python para el backend.
-MySQL: Sistema de gestión de bases de datos.
-Wokwi: Plataforma de simulación para ESP32.
+MicroPython: Lenguaje de programación para ESP32.<br />
+Flask: Framework de Python para el backend.<br />
+MySQL: Sistema de gestión de bases de datos.<br />
+Wokwi: Plataforma de simulación para ESP32.<br />
