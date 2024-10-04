@@ -1,5 +1,8 @@
 ![Miniatura IVR (1)](https://github.com/user-attachments/assets/0290406f-7b30-4855-a57c-80bfd41d62fe)
 
+## Link a wokwi
+https://wokwi.com/projects/410672224127161345
+
 ## 📋 Descripción
 Este proyecto tiene como objetivo escalar una plataforma IoT basada en microcontroladores ESP32, ampliando su funcionalidad desde una simple capa física hasta una infraestructura completa que incluye una capa de transporte de datos y un sistema de almacenamiento en una base de datos MySQL. Los dispositivos ESP32 recopilan datos de sensores de luz (LDR) y controlan actuadores (LED), transmitiendo la información a través de WiFi a un backend desarrollado con Flask, que a su vez almacena los datos en MySQL para su análisis y monitoreo en tiempo real.
 
