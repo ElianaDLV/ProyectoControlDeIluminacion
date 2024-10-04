@@ -20,7 +20,7 @@ Flask: Framework de Python para el backend.<br />
 MySQL: Sistema de gestión de bases de datos.<br />
 Wokwi: Plataforma de simulación para ESP32.<br />
 
-## Requisitos previos de software
+## ⚙️ Requisitos previos de software
 Python 3.8+ – Para el backend.<br />
 pip – Gestor de paquetes de Python.<br />
 Git – Para clonar el repositorio.<br />
