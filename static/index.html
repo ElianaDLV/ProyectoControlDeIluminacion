@@ -13,9 +13,9 @@
         tr:hover { background-color: #ddd; }
     </style>
     <!-- Cargar primero Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Luego cargar el adaptador de fechas -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+    <!-- Luego cargar el adaptador de fechas date-fns -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 </head>
 <body>
     <h1>Datos del Sensor ESP32</h1>
@@ -39,10 +39,9 @@
         const capacidadChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [],
                 datasets: [{
                     label: 'Capacidad',
-                    data: [],
+                    data: [], // Usaremos objetos {x: timestamp, y: capacidad}
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1,
                     fill: false
@@ -87,26 +86,31 @@
                 const dataBody = document.getElementById('data-body');
                 dataBody.innerHTML = ''; // Limpiar la tabla
 
-                const labels = [];
-                const capacidades = [];
+                const datasetsData = [];
 
                 data.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${item.capacidad}</td>
-                        <td>${item.timestamp}</td>
-                        <td>${item.sensor_id}</td>
-                    `;
-                    dataBody.appendChild(row);
+                    // Verificar que los campos existan y sean válidos
+                    if (item.capacidad && item.timestamp && item.sensor_id) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.capacidad}</td>
+                            <td>${item.timestamp}</td>
+                            <td>${item.sensor_id}</td>
+                        `;
+                        dataBody.appendChild(row);
 
-                    // Agregar datos al gráfico
-                    labels.push(new Date(item.timestamp));
-                    capacidades.push(item.capacidad);
+                        // Agregar datos al gráfico
+                        datasetsData.push({
+                            x: new Date(item.timestamp),
+                            y: item.capacidad
+                        });
+                    } else {
+                        console.warn("Datos incompletos:", item);
+                    }
                 });
 
                 // Actualizar el gráfico
-                capacidadChart.data.labels = labels;
-                capacidadChart.data.datasets[0].data = capacidades;
+                capacidadChart.data.datasets[0].data = datasetsData;
                 capacidadChart.update();
 
                 console.log("Tabla y gráfico actualizados con:", data);
@@ -122,3 +126,4 @@
     </script>
 </body>
 </html>
+
