@@ -5,19 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Datos del Sensor</title>
     <style>
-        body { font-family: Arial, sans-serif; }
+        body { font-family: Arial, sans-serif; margin: 20px; }
         table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 8px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #ddd; }
     </style>
 </head>
 <body>
-    <h1>Datos del Sensor</h1>
+    <h1>Datos del Sensor ESP32</h1>
     <table>
         <thead>
             <tr>
                 <th>Capacidad</th>
-                <th>Tiempo marcado</th>
+                <th>Timestamp</th>
                 <th>Sensor ID</th>
             </tr>
         </thead>
@@ -29,14 +31,18 @@
     <script>
         async function fetchData() {
             try {
-                const response = await fetch('https://proyectocontroldeiluminacion.onrender.com/data');
+                const response = await fetch('/data');
                 const data = await response.json();
                 const dataBody = document.getElementById('data-body');
                 dataBody.innerHTML = ''; // Limpiar la tabla
 
                 data.forEach(item => {
                     const row = document.createElement('tr');
-                    row.innerHTML = `<td>${item.capacidad}</td><td>${item.timestamp}</td><td>${item.sensor_id}</td>`;
+                    row.innerHTML = `
+                        <td>${item.capacidad}</td>
+                        <td>${item.timestamp}</td>
+                        <td>${item.sensor_id}</td>
+                    `;
                     dataBody.appendChild(row);
                 });
             } catch (error) {

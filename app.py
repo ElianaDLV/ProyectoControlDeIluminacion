@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import mysql.connector
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)  # Habilitar CORS para permitir solicitudes de diferentes orígenes
@@ -53,9 +54,19 @@ def get_data():
     try:
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
-        cursor.execute("SELECT capacidad, timestamp, sensor_id FROM capacidad_esp32 ORDER BY timestamp DESC LIMIT 10")  # Cambia el nombre de la tabla y campos según sea necesario
+        cursor.execute("SELECT capacidad, timestamp, sensor_id FROM capacidad_esp32 ORDER BY timestamp DESC LIMIT 10")
         rows = cursor.fetchall()
-        results = [{"capacidad": row[0], "timestamp": row[1].isoformat(), "sensor_id": row[2]} for row in rows]
+        results = []
+        for row in rows:
+            capacidad, timestamp, sensor_id = row
+            # Convertir timestamp a formato ISO
+            if isinstance(timestamp, datetime):
+                timestamp = timestamp.isoformat()
+            results.append({
+                "capacidad": capacidad,
+                "timestamp": timestamp,
+                "sensor_id": sensor_id
+            })
         cursor.close()
         conn.close()
         return jsonify(results), 200
@@ -64,7 +75,7 @@ def get_data():
 
 @app.route("/")
 def index():
-    return app.send_static_file("index.html")
+    return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
