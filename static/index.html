@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datos del Sensor</title>
+    <title>Datos del Sensor ESP32</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
-        table { border-collapse: collapse; width: 100%; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background-color: #f2f2f2; }
         tr:nth-child(even) { background-color: #f9f9f9; }
         tr:hover { background-color: #ddd; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <h1>Datos del Sensor ESP32</h1>
@@ -28,13 +29,54 @@
         </tbody>
     </table>
 
+    <canvas id="capacidadChart" width="400" height="200"></canvas>
+
     <script>
+        const ctx = document.getElementById('capacidadChart').getContext('2d');
+        const capacidadChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Capacidad',
+                    data: [],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { 
+                        type: 'time',
+                        time: {
+                            unit: 'minute'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Timestamp'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Capacidad'
+                        }
+                    }
+                }
+            }
+        });
+
         async function fetchData() {
             try {
                 const response = await fetch('/data');
                 const data = await response.json();
                 const dataBody = document.getElementById('data-body');
                 dataBody.innerHTML = ''; // Limpiar la tabla
+
+                const labels = [];
+                const capacidades = [];
 
                 data.forEach(item => {
                     const row = document.createElement('tr');
@@ -44,7 +86,17 @@
                         <td>${item.sensor_id}</td>
                     `;
                     dataBody.appendChild(row);
+
+                    // Agregar datos al gráfico
+                    labels.push(new Date(item.timestamp));
+                    capacidades.push(item.capacidad);
                 });
+
+                // Actualizar el gráfico
+                capacidadChart.data.labels = labels;
+                capacidadChart.data.datasets[0].data = capacidades;
+                capacidadChart.update();
+
             } catch (error) {
                 console.error('Error al obtener los datos:', error);
             }
