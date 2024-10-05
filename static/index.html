@@ -12,9 +12,7 @@
         tr:nth-child(even) { background-color: #f9f9f9; }
         tr:hover { background-color: #ddd; }
     </style>
-    <!-- Cargar primero Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
-    <!-- Luego cargar el adaptador de fechas date-fns -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 </head>
 <body>
@@ -25,6 +23,7 @@
                 <th>Capacidad</th>
                 <th>Timestamp</th>
                 <th>Sensor ID</th>
+                <th>Estado LED</th> <!-- Nueva columna para el estado del LED -->
             </tr>
         </thead>
         <tbody id="data-body">
@@ -90,12 +89,13 @@
 
                 data.forEach(item => {
                     // Verificar que los campos existan y sean válidos
-                    if (item.capacidad && item.timestamp && item.sensor_id) {
+                    if (item.capacidad && item.timestamp && item.sensor_id && item.estado_led) { // Asegúrate de que el estado del LED está incluido
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${item.capacidad}</td>
                             <td>${item.timestamp}</td>
                             <td>${item.sensor_id}</td>
+                            <td>${item.estado_led}</td> <!-- Mostrar el estado del LED -->
                         `;
                         dataBody.appendChild(row);
 
@@ -126,4 +126,3 @@
     </script>
 </body>
 </html>
-
