@@ -1,78 +1,98 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 import mysql.connector
+import os
+from datetime import datetime  # Importar datetime
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')  # Especificar la carpeta estática
+CORS(app, resources={r"/*": {"origins": "*"}})  # Habilitar CORS para todos los orígenes
 
-# Configuración de la base de datos
+# Configura tu conexión a la base de datos usando variables de entorno
 db_config = {
-    'user': 'tu_usuario',
-    'password': 'tu_contraseña',
-    'host': 'tu_host',
-    'database': 'mi_base_de_datos'
+    "host": "bzblpg99biozcrivgozu-mysql.services.clever-cloud.com",
+    "user": "uggqczjfkgrrerdg",
+    "password": "10SR42jjPz8tnaFfyk6l",
+    "database": "bzblpg99biozcrivgozu",
+    "port": 3306
 }
 
-@app.route('/data', methods=['POST'])
-def receive_data():
-    try:
-        # Obtener los datos enviados desde el ESP32
+@app.route("/data", methods=["POST"])
+def insert_data():
+    if request.is_json:
         data = request.get_json()
-        
-        # Extraer los valores del JSON
-        light_level = data.get('light_level')
-        sensor_id = data.get('sensor_id')
-        timestamp = data.get('timestamp')
-        estado_led = data.get('estado_led')  # Nuevo campo
 
-        # Conectar a la base de datos
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor()
+        # Extraer los campos necesarios
+        light_level = data.get("light_level")  # Este será el campo 'capacidad' en la base de datos
+        sensor_id = data.get("sensor_id", "ESP32_Sensor")  # Puedes ajustar esto según tus necesidades
+        led_state = data.get("led_state")  # Obtener el estado del LED
 
-        # Inserción de los datos en la tabla
-        insert_query = '''
-        INSERT INTO capacidad_esp32 (capacidad, timestamp, sensor_id, estado_led)
-        VALUES (%s, %s, %s, %s)
-        '''
-        cursor.execute(insert_query, (light_level, timestamp, sensor_id, estado_led))
-        conn.commit()
+        # Comprobar que el campo 'light_level' no sea None y sea un número
+        if light_level is None or not isinstance(light_level, (int, float)):
+            return jsonify({"status": "error", "message": "light_level es requerido y debe ser un número"}), 400
 
-        # Cerrar la conexión
-        cursor.close()
-        conn.close()
+        # Comprobar que el campo 'led_state' no sea None
+        if led_state is None:
+            return jsonify({"status": "error", "message": "led_state es requerido"}), 400
 
-        return jsonify({'message': 'Datos recibidos correctamente!'}), 201
+        # Conectar a la base de datos e insertar los datos
+        try:
+            conn = mysql.connector.connect(**db_config)
+            cursor = conn.cursor()
 
-    except Exception as e:
-        print('Error al recibir datos:', e)
-        return jsonify({'error': 'Error al recibir datos'}), 500
+            # Omitimos el campo 'timestamp' en la consulta para que MySQL lo genere automáticamente
+            cursor.execute(
+                "INSERT INTO capacidad_esp32 (capacidad, sensor_id, estado_led) VALUES (%s, %s, %s)",
+                (light_level, sensor_id, led_state)  # Incluir el estado del LED
+            )
+            conn.commit()
+            cursor.close()
+            conn.close()
+            print("Datos insertados:", {"capacidad": light_level, "sensor_id": sensor_id, "estado_led": led_state})  # Log de inserción
+            return jsonify({"status": "success"}), 201
+        except mysql.connector.Error as err:
+            print("Error al insertar datos:", err)  # Log de error
+            return jsonify({"status": "error", "message": str(err)}), 500
+    else:
+        return jsonify({"status": "error", "message": "Request must be JSON"}), 400
 
-@app.route('/data', methods=['GET'])
+@app.route("/data", methods=["GET"])
 def get_data():
     try:
-        # Conectar a la base de datos
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
-
-        # Consulta para obtener los datos
-        select_query = "SELECT capacidad, timestamp, sensor_id, estado_led FROM capacidad_esp32 ORDER BY timestamp DESC LIMIT 1"
-        cursor.execute(select_query)
-
-        result = cursor.fetchone()
+        cursor.execute("SELECT capacidad, timestamp, sensor_id, estado_led FROM capacidad_esp32 ORDER BY timestamp DESC LIMIT 10")
+        rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            capacidad, timestamp, sensor_id, estado_led = row
+            # Convertir timestamp a formato ISO
+            if isinstance(timestamp, datetime):
+                timestamp = timestamp.isoformat()
+            else:
+                timestamp = str(timestamp)  # Asegurarse de que sea una cadena
+            results.append({
+                "capacidad": capacidad,
+                "timestamp": timestamp,
+                "sensor_id": sensor_id,
+                "estado_led": estado_led  # Incluir el estado del LED en la respuesta
+            })
         cursor.close()
         conn.close()
+        print("Datos obtenidos en GET /data:", results)  # Log de obtención de datos
+        return jsonify(results), 200
+    except mysql.connector.Error as err:
+        print("Error al obtener datos en GET /data:", err)  # Log de error
+        return jsonify({"status": "error", "message": str(err)}), 500
 
-        if result:
-            return jsonify({
-                'capacidad': result[0],
-                'timestamp': result[1].isoformat(),  # Convertir a ISO 8601 para facilitar el manejo en el cliente
-                'sensor_id': result[2],
-                'estado_led': result[3]
-            }), 200
-        else:
-            return jsonify({'error': 'No hay datos disponibles'}), 404
+@app.route("/")
+def index():
+    print("Accediendo a la ruta principal '/'")
+    return send_from_directory(app.static_folder, "index.html")  # Servir el archivo index.html desde la carpeta 'static'
 
-    except Exception as e:
-        print('Error al obtener datos:', e)
-        return jsonify({'error': 'Error al obtener datos'}), 500
+@app.route("/test")
+def test_route():
+    return "¡El servidor Flask está funcionando correctamente!"
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Usar el puerto asignado por Render
+    app.run(host="0.0.0.0", port=port, debug=True)
