@@ -72,16 +72,16 @@ def get_data():
             })
         cursor.close()
         conn.close()
-        print("Datos obtenidos:", results)  # Log de obtención de datos
+        print("Datos obtenidos en GET /data:", results)  # Log de obtención de datos
         return jsonify(results), 200
     except mysql.connector.Error as err:
-        print("Error al obtener datos:", err)  # Log de error
+        print("Error al obtener datos en GET /data:", err)  # Log de error
         return jsonify({"status": "error", "message": str(err)}), 500
 
 @app.route("/")
 def index():
     print("Accediendo a la ruta principal '/'")
-    return send_from_directory(app.static_folder, "index.html")
+    return send_from_directory(app.static_folder, "index.html")  # Servir el archivo index.html desde la carpeta 'static'
 
 @app.route("/test")
 def test_route():
@@ -90,4 +90,3 @@ def test_route():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Usar el puerto asignado por Render
     app.run(host="0.0.0.0", port=port, debug=True)
-
