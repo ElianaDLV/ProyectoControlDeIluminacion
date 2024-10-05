@@ -5,7 +5,7 @@ import os
 from datetime import datetime  # Importar datetime
 
 app = Flask(__name__, static_folder='static')  # Asegúrate de tener una carpeta 'static'
-CORS(app)  # Habilitar CORS para permitir solicitudes de diferentes orígenes
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Configura tu conexión a la base de datos usando variables de entorno
 db_config = {
@@ -70,8 +70,10 @@ def get_data():
             })
         cursor.close()
         conn.close()
+        print("Datos obtenidos:", results)  # Log de los datos obtenidos
         return jsonify(results), 200
     except mysql.connector.Error as err:
+        print("Error al obtener datos:", err)  # Log de error
         return jsonify({"status": "error", "message": str(err)}), 500
 
 @app.route("/")
