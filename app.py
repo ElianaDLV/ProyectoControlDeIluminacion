@@ -2,9 +2,9 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import mysql.connector
 import os
-from datetime import datetime
+from datetime import datetime  # Importar datetime
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')  # Asegúrate de tener una carpeta 'static'
 CORS(app)  # Habilitar CORS para permitir solicitudes de diferentes orígenes
 
 # Configura tu conexión a la base de datos usando variables de entorno
@@ -28,7 +28,6 @@ def insert_data():
         # Comprobar que el campo 'light_level' no sea None y sea un número
         if light_level is None or not isinstance(light_level, (int, float)):
             return jsonify({"status": "error", "message": "light_level es requerido y debe ser un número"}), 400
-
 
         # Conectar a la base de datos e insertar los datos
         try:
@@ -62,6 +61,8 @@ def get_data():
             # Convertir timestamp a formato ISO
             if isinstance(timestamp, datetime):
                 timestamp = timestamp.isoformat()
+            else:
+                timestamp = str(timestamp)  # Asegurarse de que sea una cadena
             results.append({
                 "capacidad": capacidad,
                 "timestamp": timestamp,
