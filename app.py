@@ -1,11 +1,11 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory  # Importar send_from_directory
 from flask_cors import CORS
 import mysql.connector
 import os
 from datetime import datetime  # Importar datetime
 
-app = Flask(__name__, static_folder='static')  # Asegúrate de tener una carpeta 'static'
-CORS(app, resources={r"/*": {"origins": "*"}})
+app = Flask(__name__, static_folder='static')  # Especificar la carpeta estática
+CORS(app, resources={r"/*": {"origins": "*"}})  # Habilitar CORS para todos los orígenes
 
 # Configura tu conexión a la base de datos usando variables de entorno
 db_config = {
@@ -33,7 +33,7 @@ def insert_data():
         try:
             conn = mysql.connector.connect(**db_config)
             cursor = conn.cursor()
-            
+
             # Omitimos el campo 'timestamp' en la consulta para que MySQL lo genere automáticamente
             cursor.execute(
                 "INSERT INTO capacidad_esp32 (capacidad, sensor_id) VALUES (%s, %s)",
@@ -42,8 +42,10 @@ def insert_data():
             conn.commit()
             cursor.close()
             conn.close()
+            print("Datos insertados:", {"capacidad": light_level, "sensor_id": sensor_id})  # Log de inserción
             return jsonify({"status": "success"}), 201
         except mysql.connector.Error as err:
+            print("Error al insertar datos:", err)  # Log de error
             return jsonify({"status": "error", "message": str(err)}), 500
     else:
         return jsonify({"status": "error", "message": "Request must be JSON"}), 400
@@ -70,7 +72,7 @@ def get_data():
             })
         cursor.close()
         conn.close()
-        print("Datos obtenidos:", results)  # Log de los datos obtenidos
+        print("Datos obtenidos:", results)  # Log de obtención de datos
         return jsonify(results), 200
     except mysql.connector.Error as err:
         print("Error al obtener datos:", err)  # Log de error
@@ -78,7 +80,7 @@ def get_data():
 
 @app.route("/")
 def index():
-    return send_from_directory(app.static_folder, "index.html")
+    return send_from_directory(app.static_folder, "index.html")  # Servir el archivo index.html desde la carpeta 'static'
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
