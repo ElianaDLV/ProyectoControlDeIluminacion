@@ -48,5 +48,23 @@ def insert_data():
     else:
         return jsonify({"status": "error", "message": "Request must be JSON"}), 400
 
+@app.route("/data", methods=["GET"])
+def get_data():
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+        cursor.execute("SELECT capacidad, timestamp, sensor_id FROM capacidad_esp32 ORDER BY timestamp DESC LIMIT 10")  # Cambia el nombre de la tabla y campos según sea necesario
+        rows = cursor.fetchall()
+        results = [{"capacidad": row[0], "timestamp": row[1].isoformat(), "sensor_id": row[2]} for row in rows]
+        cursor.close()
+        conn.close()
+        return jsonify(results), 200
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": str(err)}), 500
+
+@app.route("/")
+def index():
+    return app.send_static_file("index.html")
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
