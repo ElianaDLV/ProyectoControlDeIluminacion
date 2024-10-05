@@ -8,7 +8,7 @@
         body { font-family: Arial, sans-serif; margin: 20px; }
         table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
+        th { background-color: #9236dc; }
         tr:nth-child(even) { background-color: #f9f9f9; }
         tr:hover { background-color: #ddd; }
     </style>
@@ -16,13 +16,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 </head>
 <body>
-    <h1>Datos del Sensor ESP32</h1>
+    <h1>Datos del Sensor</h1>
     <table>
         <thead>
             <tr>
                 <th>Capacidad</th>
-                <th>Timestamp</th>
-                <th>Sensor ID</th>
+                <th>Fecha</th> 
+                <th>Hora</th>  
                 <th>Estado LED</th> <!-- Nueva columna para el estado del LED -->
             </tr>
         </thead>
@@ -89,12 +89,16 @@
 
                 data.forEach(item => {
                     // Verificar que los campos existan y sean válidos
-                    if (item.capacidad && item.timestamp && item.sensor_id && item.estado_led) { // Asegúrate de que el estado del LED está incluido
+                    if (item.capacidad && item.timestamp && item.estado_led) { // Asegúrate de que el estado del LED está incluido
+                        const timestampDate = new Date(item.timestamp);
+                        const date = `${String(timestampDate.getDate()).padStart(2, '0')}/${String(timestampDate.getMonth() + 1).padStart(2, '0')}/${timestampDate.getFullYear()}`; // Formato DD/MM/AAAA
+                        const time = `${String(timestampDate.getHours()).padStart(2, '0')}:${String(timestampDate.getMinutes()).padStart(2, '0')}`; // Formato HH:MM
+
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${item.capacidad}</td>
-                            <td>${item.timestamp}</td>
-                            <td>${item.sensor_id}</td>
+                            <td>${date}</td> <!-- Mostrar la fecha -->
+                            <td>${time}</td>  <!-- Mostrar la hora -->
                             <td>${item.estado_led}</td> <!-- Mostrar el estado del LED -->
                         `;
                         dataBody.appendChild(row);
