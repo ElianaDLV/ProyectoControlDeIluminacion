@@ -80,7 +80,14 @@ def get_data():
 
 @app.route("/")
 def index():
-    return send_from_directory(app.static_folder, "index.html")  # Servir el archivo index.html desde la carpeta 'static'
+    print("Accediendo a la ruta principal '/'")
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route("/test")
+def test_route():
+    return "¡El servidor Flask está funcionando correctamente!"
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Usar el puerto asignado por Render
+    app.run(host="0.0.0.0", port=port, debug=True)
+
