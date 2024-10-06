@@ -23,7 +23,6 @@ def insert_data():
 
         # Extraer los campos necesarios
         light_level = data.get("light_level")  # Este será el campo 'capacidad' en la base de datos
-        sensor_id = data.get("sensor_id", "ESP32_Sensor")  # Puedes ajustar esto según tus necesidades
         led_state = data.get("led_state")  # Obtener el estado del LED
 
         # Comprobar que el campo 'light_level' no sea None y sea un número
@@ -39,15 +38,15 @@ def insert_data():
             conn = mysql.connector.connect(**db_config)
             cursor = conn.cursor()
 
-            # Omitimos el campo 'timestamp' en la consulta para que MySQL lo genere automáticamente
+            # Insertar datos en la base de datos
             cursor.execute(
-                "INSERT INTO capacidad_esp32 (capacidad, sensor_id, estado_led) VALUES (%s, %s, %s)",
-                (light_level, sensor_id, led_state)  # Incluir el estado del LED
+                "INSERT INTO capacidad_esp32 (capacidad, estado_led) VALUES (%s, %s)",
+                (light_level, led_state)  # Incluir el estado del LED
             )
             conn.commit()
             cursor.close()
             conn.close()
-            print("Datos insertados:", {"capacidad": light_level, "sensor_id": sensor_id, "estado_led": led_state})  # Log de inserción
+            print("Datos insertados:", {"capacidad": light_level, "estado_led": led_state})  # Log de inserción
             return jsonify({"status": "success"}), 201
         except mysql.connector.Error as err:
             print("Error al insertar datos:", err)  # Log de error
@@ -60,21 +59,31 @@ def get_data():
     try:
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
-        cursor.execute("SELECT capacidad, timestamp, sensor_id, estado_led FROM capacidad_esp32 ORDER BY timestamp DESC LIMIT 10")
+        cursor.execute("SELECT capacidad, timestamp, estado_led FROM capacidad_esp32 ORDER BY timestamp DESC LIMIT 10")
         rows = cursor.fetchall()
         results = []
         for row in rows:
-            capacidad, timestamp, sensor_id, estado_led = row
-            # Convertir timestamp a formato ISO
+            capacidad, timestamp, estado_led = row
+
+            # Convertir timestamp a formato dd/mm/yyyy y hora
             if isinstance(timestamp, datetime):
-                timestamp = timestamp.isoformat()
+                formatted_date = timestamp.strftime("%d/%m/%Y")  # Formato de fecha
+                formatted_time = timestamp.strftime("%H:%M:%S")  # Formato de hora
             else:
-                timestamp = str(timestamp)  # Asegurarse de que sea una cadena
+                # Manejo en caso de que el timestamp no sea un objeto datetime
+                try:
+                    timestamp_date = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
+                    formatted_date = timestamp_date.strftime("%d/%m/%Y")
+                    formatted_time = timestamp_date.strftime("%H:%M:%S")
+                except:
+                    formatted_date = str(timestamp)
+                    formatted_time = "00:00:00"  # Valor por defecto
+
             results.append({
                 "capacidad": capacidad,
-                "timestamp": timestamp,
-                "sensor_id": sensor_id,
-                "estado_led": estado_led  # Incluir el estado del LED en la respuesta
+                "fecha": formatted_date,  # Incluir la fecha en el formato deseado
+                "hora": formatted_time,    # Incluir la hora en formato deseado
+                "estado_led": estado_led   # Incluir el estado del LED en la respuesta
             })
         cursor.close()
         conn.close()
