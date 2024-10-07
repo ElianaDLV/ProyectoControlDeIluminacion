@@ -1,301 +1,161 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datos del Sensor</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <!-- Font Awesome para iconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #121212; /* Fondo oscuro */
-            color: #ffffff; /* Texto claro */
-            padding-top: 20px;
-        }
-        .table-container {
-            overflow-x: auto;
-        }
-        .chart-container {
-            position: relative;
-            height: 400px;
-            width: 100%;
-        }
-        /* Estilos personalizados para la tabla */
-        table th {
-            background-color: #6f42c1; /* Violeta */
-            color: #ffffff;
-        }
-        table tbody tr:hover {
-            background-color: #8e44ad; /* Púrpura */
-        }
-        /* Estilos para las tarjetas */
-        .card {
-            background-color: #1f1f1f;
-            color: #ffffff;
-            margin-bottom: 20px;
-            border: 1px solid #6f42c1; /* Bordes violetas */
-            transition: transform 0.2s;
-        }
-        .card:hover {
-            transform: scale(1.02);
-        }
-        .card-header {
-            background-color: #6f42c1; /* Violeta */
-            color: #ffffff;
-            font-weight: bold;
-        }
-        .card-body {
-            background-color: #1f1f1f;
-            color: #ffffff;
-        }
-        /* Ajustes para el gráfico */
-        canvas {
-            background-color: #1f1f1f;
-        }
-        /* Estilos de los iconos */
-        .card-title i {
-            margin-right: 10px;
-        }
-        /* Título Principal en Violeta */
-        .main-title {
-            color: #6f42c1; /* Violeta */
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Título Principal -->
-        <div class="text-center mb-4">
-            <h1 class="main-title"><i class="fas fa-lightbulb"></i> Datos del Sensor</h1>
-            <p class="text-muted">Monitoriza el nivel de luz y el estado del LED en tiempo real</p>
-        </div>
-
-        <!-- Tarjetas Informativas -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card text-center">
-                    <div class="card-header">
-                        <i class="fas fa-sun"></i> Última Lectura
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">Nivel de Luz</h5>
-                        <p class="card-text" id="last-reading">Cargando...</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card text-center">
-                    <div class="card-header">
-                        <i class="fas fa-lightbulb"></i> Estado del LED
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">LED</h5>
-                        <p class="card-text" id="led-status">Cargando...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabla de Datos -->
-        <div class="mt-4">
-            <div class="table-container">
-                <table class="table table-dark table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>Nivel de Luz</th>
-                            <th>Fecha</th> 
-                            <th>Hora</th>  
-                            <th>Estado LED</th>
-                        </tr>
-                    </thead>
-                    <tbody id="data-body">
-                        <!-- Los datos se llenarán aquí -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Gráfico de Nivel de Luz -->
-        <div class="mt-4">
-            <div class="card">
-                <div class="card-header">
-                    <i class="fas fa-chart-line"></i> Histórico de Nivel de Luz
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="capacidadChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS y dependencias (Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const ctx = document.getElementById('capacidadChart').getContext('2d');
-        const capacidadChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: 'Nivel de Luz',
-                    data: [], // Usaremos objetos {x: timestamp, y: capacidad}
-                    borderColor: 'rgba(106, 90, 205, 1)', // Azul violeta
-                    borderWidth: 2,
-                    fill: false,
-                    tension: 0.3, // Curvatura suave en las líneas
-                    pointRadius: 3,
-                    pointBackgroundColor: 'rgba(106, 90, 205, 1)',
-                    pointBorderColor: '#ffffff' // Borde blanco en los puntos
-                }]
+<script>
+    const ctx = document.getElementById('capacidadChart').getContext('2d');
+    const capacidadChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Nivel de Luz',
+                data: [], // Usaremos objetos {x: timestamp, y: capacidad}
+                borderColor: 'rgba(149, 165, 166, 1)', // Gris azulado
+                borderWidth: 2,
+                fill: false,
+                tension: 0.3, // Curvatura suave en las líneas
+                pointRadius: 3,
+                pointBackgroundColor: 'rgba(149, 165, 166, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#ffffff'
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: '#343a40',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff'
+                }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            },
+            scales: {
+                x: { 
+                    type: 'time',
+                    time: {
+                        unit: 'minute',
+                        displayFormats: {
+                            minute: 'dd/MM/yyyy HH:mm'
+                        }
+                    },
+                    title: {
                         display: true,
-                        labels: {
-                            color: '#ffffff'
+                        text: 'Fecha y Hora',
+                        color: '#ffffff',
+                        font: {
+                            size: 14
                         }
                     },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: '#343a40',
-                        titleColor: '#ffffff',
-                        bodyColor: '#ffffff'
+                    grid: {
+                        color: '#343a40'
+                    },
+                    ticks: {
+                        color: '#ffffff'
                     }
                 },
-                interaction: {
-                    mode: 'nearest',
-                    axis: 'x',
-                    intersect: false
-                },
-                scales: {
-                    x: { 
-                        type: 'time',
-                        time: {
-                            unit: 'minute',
-                            displayFormats: {
-                                minute: 'dd/MM/yyyy HH:mm'
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Fecha y Hora',
-                            color: '#ffffff',
-                            font: {
-                                size: 14
-                            }
-                        },
-                        grid: {
-                            color: '#343a40'
-                        },
-                        ticks: {
-                            color: '#ffffff'
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Nivel de Luz',
+                        color: '#ffffff',
+                        font: {
+                            size: 14
                         }
                     },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Nivel de Luz',
-                            color: '#ffffff',
-                            font: {
-                                size: 14
-                            }
-                        },
-                        grid: {
-                            color: '#343a40'
-                        },
-                        ticks: {
-                            color: '#ffffff'
-                        }
+                    grid: {
+                        color: '#343a40'
+                    },
+                    ticks: {
+                        color: '#ffffff'
                     }
                 }
-            }
-        });
-
-        async function fetchData() {
-            try {
-                console.log("Iniciando fetch de datos...");
-                const response = await fetch('/data');
-                console.log("Respuesta de /data:", response);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log("Datos recibidos:", data);
-
-                const dataBody = document.getElementById('data-body');
-                dataBody.innerHTML = ''; // Limpiar la tabla
-
-                const datasetsData = [];
-
-                let lastReading = "N/A";
-                let ledStatus = "N/A";
-
-                data.forEach((item, index) => {
-                    // Verificar que los campos existan y sean válidos
-                    if (item.capacidad !== undefined && item.fecha && item.hora && item.estado_led) { 
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${item.capacidad}</td>
-                            <td>${item.fecha}</td> <!-- Mostrar la fecha -->
-                            <td>${item.hora}</td>  <!-- Mostrar la hora -->
-                            <td>${item.estado_led}</td> <!-- Mostrar el estado del LED -->
-                        `;
-                        dataBody.appendChild(row);
-
-                        // Agregar datos al gráfico
-                        const timestamp = new Date(`${item.fecha} ${item.hora}`);
-                        datasetsData.push({
-                            x: timestamp,
-                            y: item.capacidad
-                        });
-
-                        // Actualizar la última lectura y estado del LED
-                        if (index === 0) { // Solo la primera es la más reciente
-                            lastReading = item.capacidad;
-                            ledStatus = item.estado_led;
-                        }
-                    } else {
-                        console.warn("Datos incompletos:", item);
-                    }
-                });
-
-                // Actualizar el gráfico
-                capacidadChart.data.datasets[0].data = datasetsData;
-                capacidadChart.update();
-
-                // Actualizar las tarjetas informativas
-                document.getElementById('last-reading').innerText = `${lastReading}`;
-                const ledStatusElement = document.getElementById('led-status');
-                if (ledStatus.toLowerCase() === 'encendido') {
-                    ledStatusElement.innerHTML = `<i class="fas fa-lightbulb text-warning"></i> Encendido`;
-                } else {
-                    ledStatusElement.innerHTML = `<i class="fas fa-lightbulb text-secondary"></i> Apagado`;
-                }
-
-                console.log("Tabla y gráfico actualizados con:", data);
-            } catch (error) {
-                console.error('Error al obtener los datos:', error);
             }
         }
+    });
 
-        // Cargar los datos al inicio
-        fetchData();
-        // Recargar los datos cada 10 segundos
-        setInterval(fetchData, 10000);
-    </script>
-</body>
-</html>
+    async function fetchData() {
+        try {
+            console.log("Iniciando fetch de datos...");
+            const response = await fetch('/data');
+            console.log("Respuesta de /data:", response);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("Datos recibidos:", data);
+
+            const dataBody = document.getElementById('data-body');
+            dataBody.innerHTML = ''; // Limpiar la tabla
+
+            const datasetsData = [];
+
+            let lastReading = "N/A";
+            let ledStatus = "N/A";
+
+            data.forEach((item, index) => {
+                // Verificar que los campos existan y sean válidos
+                if (item.capacidad !== undefined && item.fecha && item.hora && item.estado_led) { 
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.capacidad}</td>
+                        <td>${item.fecha}</td> <!-- Mostrar la fecha -->
+                        <td>${item.hora}</td>  <!-- Mostrar la hora -->
+                        <td>${item.estado_led}</td> <!-- Mostrar el estado del LED -->
+                    `;
+                    dataBody.appendChild(row);
+
+                    // Agregar datos al gráfico
+                    // Crear un objeto Date con la fecha y hora ya ajustadas en Argentina
+                    const [day, month, year] = item.fecha.split('/');
+                    const [hour, minute, second] = item.hora.split(':');
+                    const timestamp = new Date(year, month - 1, day, hour, minute, second);
+                    datasetsData.push({
+                        x: timestamp,
+                        y: item.capacidad
+                    });
+
+                    // Actualizar la última lectura y estado del LED
+                    if (index === 0) { // Solo la primera es la más reciente
+                        lastReading = item.capacidad;
+                        ledStatus = item.estado_led;
+                    }
+                } else {
+                    console.warn("Datos incompletos:", item);
+                }
+            });
+
+            // Actualizar el gráfico
+            capacidadChart.data.datasets[0].data = datasetsData;
+            capacidadChart.update();
+
+            // Actualizar las tarjetas informativas
+            document.getElementById('last-reading').innerText = `Nivel de Luz: ${lastReading}`;
+            const ledStatusElement = document.getElementById('led-status');
+            if (ledStatus.toLowerCase() === 'encendido') {
+                ledStatusElement.innerHTML = `Estado LED: <i class="fas fa-lightbulb text-warning"></i> Encendido`;
+            } else {
+                ledStatusElement.innerHTML = `Estado LED: <i class="fas fa-lightbulb text-secondary"></i> Apagado`;
+            }
+
+            console.log("Tabla y gráfico actualizados con:", data);
+        } catch (error) {
+            console.error('Error al obtener los datos:', error);
+        }
+    }
+
+    // Cargar los datos al inicio
+    fetchData();
+    // Recargar los datos cada 10 segundos
+    setInterval(fetchData, 10000);
+</script>
