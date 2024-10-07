@@ -2,10 +2,11 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import mysql.connector
 import os
-from datetime import datetime  # Importar datetime
+from datetime import datetime
+from zoneinfo import ZoneInfo  # Importar ZoneInfo para manejo de zonas horarias
 
-app = Flask(__name__, static_folder='static')  # Especificar la carpeta estática
-CORS(app, resources={r"/*": {"origins": "*"}})  # Habilitar CORS para todos los orígenes
+app = Flask(__name__, static_folder='static')
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Configura tu conexión a la base de datos usando variables de entorno
 db_config = {
@@ -15,6 +16,9 @@ db_config = {
     "database": "bzblpg99biozcrivgozu",
     "port": 3306
 }
+
+# Definir la zona horaria de Argentina
+argentina_tz = ZoneInfo('America/Argentina/Buenos_Aires')
 
 @app.route("/data", methods=["POST"])
 def insert_data():
@@ -38,10 +42,10 @@ def insert_data():
             conn = mysql.connector.connect(**db_config)
             cursor = conn.cursor()
 
-            # Insertar datos en la base de datos
+            # Insertar datos en la base de datos (omitiendo sensor_id)
             cursor.execute(
                 "INSERT INTO capacidad_esp32 (capacidad, estado_led) VALUES (%s, %s)",
-                (light_level, led_state)  # Incluir el estado del LED
+                (light_level, led_state)
             )
             conn.commit()
             cursor.close()
@@ -65,14 +69,17 @@ def get_data():
         for row in rows:
             capacidad, timestamp, estado_led = row
 
-            # Convertir timestamp a formato dd/mm/yyyy y hora
+            # Asegurarse de que timestamp es un objeto datetime
             if isinstance(timestamp, datetime):
+                # Asumir que el timestamp está en UTC y convertir a Argentina
+                timestamp = timestamp.replace(tzinfo=ZoneInfo('UTC')).astimezone(argentina_tz)
                 formatted_date = timestamp.strftime("%d/%m/%Y")  # Formato de fecha
                 formatted_time = timestamp.strftime("%H:%M:%S")  # Formato de hora
             else:
                 # Manejo en caso de que el timestamp no sea un objeto datetime
                 try:
                     timestamp_date = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
+                    timestamp_date = timestamp_date.replace(tzinfo=ZoneInfo('UTC')).astimezone(argentina_tz)
                     formatted_date = timestamp_date.strftime("%d/%m/%Y")
                     formatted_time = timestamp_date.strftime("%H:%M:%S")
                 except:
