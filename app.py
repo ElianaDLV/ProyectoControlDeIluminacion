@@ -4,6 +4,12 @@ import mysql.connector
 import os
 from datetime import datetime
 from zoneinfo import ZoneInfo  # Importar ZoneInfo para manejo de zonas horarias
+import pytz
+
+argentina_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+
+# Conversión de horario
+timestamp = timestamp.replace(tzinfo=pytz.UTC).astimezone(argentina_tz)
 
 app = Flask(__name__, static_folder='static')
 CORS(app, resources={r"/*": {"origins": "*"}})
