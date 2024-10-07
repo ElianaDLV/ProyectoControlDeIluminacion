@@ -1,6 +1,5 @@
 ![Miniatura IVR (1)](https://github.com/user-attachments/assets/0290406f-7b30-4855-a57c-80bfd41d62fe)
 
-### Links para ver su función
 ### Simulación en Wokwi
 Puedes ver y ejecutar la simulación en Wokwi y, ver la interfaz mediante los siguientes enlaces:
 - [Simulación en Wokwi](https://wokwi.com/projects/410672224127161345)
