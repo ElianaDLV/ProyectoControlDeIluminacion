@@ -75,27 +75,22 @@
             <p class="text-muted">Monitoriza el nivel de luz y el estado del LED en tiempo real</p>
         </div>
 
-        <!-- Tarjetas Informativas -->
+        <!-- Tarjeta Única de Última Lectura -->
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <div class="card text-center">
                     <div class="card-header">
-                        <i class="fas fa-sun"></i> Última Lectura
+                        <i class="fas fa-terminal"></i> Última Lectura
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title" id="last-reading">Cargando...</h5>
-                        <p class="card-text">Nivel de Luz</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card text-center">
-                    <div class="card-header">
-                        <i class="fas fa-lightbulb"></i> Estado del LED
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title" id="led-status">Cargando...</h5>
-                        <p class="card-text">LED</p>
+                        <div class="mb-3">
+                            <h5 class="card-title"><i class="fas fa-sun"></i> Nivel de Luz</h5>
+                            <p class="card-text" id="last-reading">Cargando...</p>
+                        </div>
+                        <div>
+                            <h5 class="card-title"><i class="fas fa-lightbulb"></i> Estado del LED</h5>
+                            <p class="card-text" id="led-status">Cargando...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -279,13 +274,15 @@
                 capacidadChart.data.datasets[0].data = datasetsData;
                 capacidadChart.update();
 
-                // Actualizar las tarjetas informativas
-                document.getElementById('last-reading').innerText = `Nivel de Luz: ${lastReading}`;
+                // Actualizar la tarjeta informativa
+                document.getElementById('last-reading').innerText = `${item.capacidad !== undefined ? `Nivel de Luz: ${lastReading}` : "Nivel de Luz: N/A"}`;
                 const ledStatusElement = document.getElementById('led-status');
                 if (ledStatus.toLowerCase() === 'encendido') {
-                    ledStatusElement.innerHTML = `Estado LED: <i class="fas fa-lightbulb text-warning"></i> Encendido`;
+                    ledStatusElement.innerHTML = `<i class="fas fa-lightbulb text-warning"></i> Encendido`;
+                } else if (ledStatus.toLowerCase() === 'apagado') {
+                    ledStatusElement.innerHTML = `<i class="fas fa-lightbulb text-secondary"></i> Apagado`;
                 } else {
-                    ledStatusElement.innerHTML = `Estado LED: <i class="fas fa-lightbulb text-secondary"></i> Apagado`;
+                    ledStatusElement.innerHTML = `Estado LED: ${ledStatus}`;
                 }
 
                 console.log("Tabla y gráfico actualizados con:", data);
