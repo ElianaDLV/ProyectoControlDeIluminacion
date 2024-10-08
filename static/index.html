@@ -275,7 +275,7 @@
                 capacidadChart.update();
 
                 // Actualizar la tarjeta informativa
-                document.getElementById('last-reading').innerText = `${item.capacidad !== undefined ? `Nivel de Luz: ${lastReading}` : "Nivel de Luz: N/A"}`;
+                document.getElementById('last-reading').innerText = `Nivel de Luz: ${lastReading}`;
                 const ledStatusElement = document.getElementById('led-status');
                 if (ledStatus.toLowerCase() === 'encendido') {
                     ledStatusElement.innerHTML = `<i class="fas fa-lightbulb text-warning"></i> Encendido`;
