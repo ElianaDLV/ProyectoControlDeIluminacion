@@ -3,12 +3,12 @@ from flask_cors import CORS
 import mysql.connector
 import os
 from datetime import datetime
-import pytz  # Importar pytz
+from zoneinfo import ZoneInfo  # Importar ZoneInfo
 
 app = Flask(__name__, static_folder='static')
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Configura tu conexión a la base de datos usando variables de entorno
+# Configura tu conexión a la base de datos
 db_config = {
     "host": "bzblpg99biozcrivgozu-mysql.services.clever-cloud.com",
     "user": "uggqczjfkgrrerdg",
@@ -18,7 +18,7 @@ db_config = {
 }
 
 # Definir la zona horaria de Argentina
-argentina_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+argentina_tz = ZoneInfo('America/Argentina/Buenos_Aires')
 
 @app.route("/data", methods=["POST"])
 def insert_data():
@@ -72,16 +72,14 @@ def get_data():
             # Convertir timestamp a formato dd/mm/yyyy y hora en Argentina
             if isinstance(timestamp, datetime):
                 # Asumiendo que el timestamp está en UTC
-                utc = pytz.UTC
-                timestamp = utc.localize(timestamp).astimezone(argentina_tz)
+                timestamp = timestamp.replace(tzinfo=ZoneInfo('UTC')).astimezone(argentina_tz)
                 formatted_date = timestamp.strftime("%d/%m/%Y")
                 formatted_time = timestamp.strftime("%H:%M:%S")
             else:
                 # Manejo en caso de que el timestamp no sea un objeto datetime
                 try:
                     timestamp_date = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
-                    utc = pytz.UTC
-                    timestamp_date = utc.localize(timestamp_date).astimezone(argentina_tz)
+                    timestamp_date = timestamp_date.replace(tzinfo=ZoneInfo('UTC')).astimezone(argentina_tz)
                     formatted_date = timestamp_date.strftime("%d/%m/%Y")
                     formatted_time = timestamp_date.strftime("%H:%M:%S")
                 except:
