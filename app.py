@@ -2,10 +2,11 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import mysql.connector
 import os
-from datetime import datetime  # Importar datetime
+from datetime import datetime
+import pytz  # Importar pytz
 
-app = Flask(__name__, static_folder='static')  # Especificar la carpeta estática
-CORS(app, resources={r"/*": {"origins": "*"}})  # Habilitar CORS para todos los orígenes
+app = Flask(__name__, static_folder='static')
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Configura tu conexión a la base de datos usando variables de entorno
 db_config = {
@@ -16,6 +17,9 @@ db_config = {
     "port": 3306
 }
 
+# Definir la zona horaria de Argentina
+argentina_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+
 @app.route("/data", methods=["POST"])
 def insert_data():
     if request.is_json:
@@ -23,7 +27,7 @@ def insert_data():
 
         # Extraer los campos necesarios
         light_level = data.get("light_level")  # Este será el campo 'capacidad' en la base de datos
-        led_state = data.get("led_state")  # Obtener el estado del LED
+        led_state = data.get("led_state")      # Obtener el estado del LED
 
         # Comprobar que el campo 'light_level' no sea None y sea un número
         if light_level is None or not isinstance(light_level, (int, float)):
@@ -41,7 +45,7 @@ def insert_data():
             # Insertar datos en la base de datos
             cursor.execute(
                 "INSERT INTO capacidad_esp32 (capacidad, estado_led) VALUES (%s, %s)",
-                (light_level, led_state)  # Incluir el estado del LED
+                (light_level, led_state)
             )
             conn.commit()
             cursor.close()
@@ -65,14 +69,19 @@ def get_data():
         for row in rows:
             capacidad, timestamp, estado_led = row
 
-            # Convertir timestamp a formato dd/mm/yyyy y hora
+            # Convertir timestamp a formato dd/mm/yyyy y hora en Argentina
             if isinstance(timestamp, datetime):
-                formatted_date = timestamp.strftime("%d/%m/%Y")  # Formato de fecha
-                formatted_time = timestamp.strftime("%H:%M:%S")  # Formato de hora
+                # Asumiendo que el timestamp está en UTC
+                utc = pytz.UTC
+                timestamp = utc.localize(timestamp).astimezone(argentina_tz)
+                formatted_date = timestamp.strftime("%d/%m/%Y")
+                formatted_time = timestamp.strftime("%H:%M:%S")
             else:
                 # Manejo en caso de que el timestamp no sea un objeto datetime
                 try:
                     timestamp_date = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
+                    utc = pytz.UTC
+                    timestamp_date = utc.localize(timestamp_date).astimezone(argentina_tz)
                     formatted_date = timestamp_date.strftime("%d/%m/%Y")
                     formatted_time = timestamp_date.strftime("%H:%M:%S")
                 except:

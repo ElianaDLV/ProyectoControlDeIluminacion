@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datos del Sensor ESP32</title>
+    <title>Datos del Sensor</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -26,18 +28,27 @@
         }
         /* Estilos personalizados para la tabla */
         table th {
-            background-color: #1f1f1f;
+            background-color: #6f42c1; /* Violeta */
             color: #ffffff;
+        }
+        table tbody tr:hover {
+            background-color: #8e44ad; /* Púrpura */
         }
         /* Estilos para las tarjetas */
         .card {
             background-color: #1f1f1f;
             color: #ffffff;
             margin-bottom: 20px;
+            border: 1px solid #6f42c1; /* Bordes violetas */
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.02);
         }
         .card-header {
-            background-color: #343a40;
+            background-color: #6f42c1; /* Violeta */
             color: #ffffff;
+            font-weight: bold;
         }
         .card-body {
             background-color: #1f1f1f;
@@ -47,13 +58,21 @@
         canvas {
             background-color: #1f1f1f;
         }
+        /* Estilos de los iconos */
+        .card-title i {
+            margin-right: 10px;
+        }
+        /* Clase personalizada para texto violeta */
+        .text-violet {
+            color: #6f42c1 !important;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Título Principal -->
         <div class="text-center mb-4">
-            <h1 class="text-primary">Datos del Sensor ESP32</h1>
+            <h1 class="text-violet"><i class="fas fa-lightbulb"></i> Datos del Sensor</h1>
             <p class="text-muted">Monitoriza el nivel de luz y el estado del LED en tiempo real</p>
         </div>
 
@@ -62,18 +81,18 @@
             <div class="col-md-6">
                 <div class="card text-center">
                     <div class="card-header">
-                        Última Lectura
+                        <i class="fas fa-sun"></i> Última Lectura
                     </div>
                     <div class="card-body">
                         <h5 class="card-title" id="last-reading">Cargando...</h5>
-                        <p class="card-text">Capacidad</p>
+                        <p class="card-text">Nivel de Luz</p>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="card text-center">
                     <div class="card-header">
-                        Estado del LED
+                        <i class="fas fa-lightbulb"></i> Estado del LED
                     </div>
                     <div class="card-body">
                         <h5 class="card-title" id="led-status">Cargando...</h5>
@@ -89,7 +108,7 @@
                 <table class="table table-dark table-striped table-hover">
                     <thead>
                         <tr>
-                            <th>Capacidad</th>
+                            <th>Nivel de Luz</th>
                             <th>Fecha</th> 
                             <th>Hora</th>  
                             <th>Estado LED</th> <!-- Nueva columna para el estado del LED -->
@@ -102,11 +121,11 @@
             </div>
         </div>
 
-        <!-- Gráfico de Capacidad -->
+        <!-- Gráfico de Nivel de Luz -->
         <div class="mt-4">
             <div class="card">
                 <div class="card-header">
-                    Histórico de Capacidad
+                    <i class="fas fa-chart-line"></i> Histórico de Nivel de Luz
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
@@ -125,14 +144,15 @@
             type: 'line',
             data: {
                 datasets: [{
-                    label: 'Capacidad',
+                    label: 'Nivel de Luz',
                     data: [], // Usaremos objetos {x: timestamp, y: capacidad}
-                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderColor: 'rgba(106, 90, 205, 1)', // Violeta
                     borderWidth: 2,
                     fill: false,
                     tension: 0.3, // Curvatura suave en las líneas
                     pointRadius: 3,
-                    pointBackgroundColor: 'rgba(75, 192, 192, 1)'
+                    pointBackgroundColor: 'rgba(106, 90, 205, 1)',
+                    pointBorderColor: '#ffffff' // Borde blanco en los puntos
                 }]
             },
             options: {
@@ -147,7 +167,10 @@
                     },
                     tooltip: {
                         mode: 'index',
-                        intersect: false
+                        intersect: false,
+                        backgroundColor: '#343a40',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff'
                     }
                 },
                 interaction: {
@@ -183,7 +206,7 @@
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Capacidad',
+                            text: 'Nivel de Luz',
                             color: '#ffffff',
                             font: {
                                 size: 14
@@ -234,7 +257,10 @@
                         dataBody.appendChild(row);
 
                         // Agregar datos al gráfico
-                        const timestamp = new Date(`${item.fecha} ${item.hora}`);
+                        // Crear un objeto Date con la fecha y hora ya ajustadas en Argentina
+                        const [day, month, year] = item.fecha.split('/');
+                        const [hour, minute, second] = item.hora.split(':');
+                        const timestamp = new Date(year, month - 1, day, hour, minute, second);
                         datasetsData.push({
                             x: timestamp,
                             y: item.capacidad
@@ -255,8 +281,13 @@
                 capacidadChart.update();
 
                 // Actualizar las tarjetas informativas
-                document.getElementById('last-reading').innerText = `Capacidad: ${lastReading}`;
-                document.getElementById('led-status').innerText = `Estado: ${ledStatus}`;
+                document.getElementById('last-reading').innerText = `Nivel de Luz: ${lastReading}`;
+                const ledStatusElement = document.getElementById('led-status');
+                if (ledStatus.toLowerCase() === 'encendido') {
+                    ledStatusElement.innerHTML = `Estado LED: <i class="fas fa-lightbulb text-warning"></i> Encendido`;
+                } else {
+                    ledStatusElement.innerHTML = `Estado LED: <i class="fas fa-lightbulb text-secondary"></i> Apagado`;
+                }
 
                 console.log("Tabla y gráfico actualizados con:", data);
             } catch (error) {
